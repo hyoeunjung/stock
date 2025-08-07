@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class CompanyService {
+
+    private final Trie trie;
     private final CompanyRepository companyRepository;
     private final DividendRepository dividendRepository;
     private final Scraper yahooFinanceScraper;
@@ -63,4 +65,16 @@ public class CompanyService {
         return company;
 
     }
+
+    public void addAutocompleteKeyword(String keyword){
+        trie.put(keyword, null);
+    }
+
+    public List<String> autocomplete(String keyword){
+        return (List<String>) trie.prefixMap(keyword).keySet()
+                .stream().collect(Collectors.toList());
+    }
+    public void deleteAutocompleteKeyword(String keyword){
+    trie.remove(keyword);}
 }
+
