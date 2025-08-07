@@ -3,6 +3,7 @@ package com.dayone.persist.entity;
 import com.dayone.model.Dividend;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -10,15 +11,9 @@ import java.time.LocalDateTime;
 
 @Entity(name = "DIVIDEND")
 @Getter
+@Setter
 @ToString
 @NoArgsConstructor
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        columnNames = { "companyId", "date" }
-                )
-        }
-)
 public class DividendEntity {
 
     @Id
