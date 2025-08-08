@@ -96,7 +96,7 @@ public class YahooFinanceScraper implements Scraper { // Scraper 인터페이스
 
                     int year = Integer.valueOf(splits[2]);
 
-                    String dividendValue = splits[3];
+                    String dividend = splits[3];
 
 
                     if (month < 0 ){
@@ -104,10 +104,8 @@ public class YahooFinanceScraper implements Scraper { // Scraper 인터페이스
                     }
 
 
-                    dividends.add(Dividend.builder()
-                            .date(LocalDateTime.of(year, month, day, 0, 0))
-                            .dividend(dividendValue)
-                            .build());
+                    dividends.add(new Dividend(LocalDateTime.of(year, month, day, 0, 0), dividend));
+
                 } catch (NumberFormatException ex) {
                     System.err.println("Error parsing date or dividend value for row: '" + txt + "'");
                 } catch (RuntimeException ex) {
@@ -184,10 +182,8 @@ public class YahooFinanceScraper implements Scraper { // Scraper 인터페이스
             }
 
 
-            return Company.builder()
-                    .ticker(ticker)
-                    .name(companyName)
-                    .build();
+            return new Company(ticker, companyName);
+
 
         } catch (IOException e) {
             System.err.println("Error during company summary scraping for ticker " + ticker + ": " + e.getMessage());
