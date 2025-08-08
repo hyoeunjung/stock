@@ -24,7 +24,9 @@ public class FinanceService {
     private final DividendRepository dividendRepository;
 
 //    @Cacheable(key = "#companyName", value = CacheKey.KEY_FINANCE)
+   @Cacheable(key = "#companyName", value = CacheKey.KEY_FINANCE)
     public ScrapedResult getDividendByCompanyName(String companyName) {
+       log.info("search companyName -> " + companyName);
         // 1. 회사명을 기준으로 회사 정보를 조회
         CompanyEntity company = companyRepository.findByName(companyName.trim())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 회사입니다"));
@@ -35,16 +37,10 @@ public class FinanceService {
         // 3. 결과 조합 후 반환 (Stream API 사용)
         // dividendEntities 리스트를 Dividend 모델 리스트로 변환합니다.
         List<Dividend> dividends = dividendEntities.stream()
-                .map(entity -> Dividend.builder()
-                        .date(entity.getDate())
-                        .dividend(entity.getDividend())
-                        .build())
+                .map(e -> new Dividend(e.getDate(), e.getDividend()))
                 .collect(Collectors.toList());
 
-        return new ScrapedResult(Company.builder()
-                .ticker(company.getTicker())
-                .name(company.getName())
-                .build(),
+        return new ScrapedResult(new Company(company.getTicker(), company.getName()),
                 dividends);
     }
 }
