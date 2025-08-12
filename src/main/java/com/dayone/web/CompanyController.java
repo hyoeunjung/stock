@@ -32,12 +32,14 @@ public class CompanyController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('READ')")
     public ResponseEntity<?> searchCompany(final Pageable pageable) {
         Page<CompanyEntity> companies = companyService.getAllCompany(pageable);
         return ResponseEntity.ok(companies);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('WRITE')")
     public ResponseEntity<?> addCompany(@RequestBody Company request) {
         String ticker = request.getTicker().trim();
         if(ObjectUtils.isEmpty(ticker)){

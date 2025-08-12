@@ -26,7 +26,7 @@ public class TokenProvider {
 
     private final MemberService memberService;
 
-    @Value("{spring.jwt.secret}")
+    @Value("${spring.jwt.secret}")
     private String secretKey;
 
     /**
@@ -37,15 +37,26 @@ public class TokenProvider {
      */
     public String generateToken(String username, List<String> roles) {
         // 다음 정보들을 포함한 claims 생성
+        Claims claims = Jwts.claims().setSubject(username);
+        claims.put(KEY_ROLES, roles);
         //      - username
         //      - roles
         //      - 생성 시간
+        var now = new Date();
         //      - 만료 시간
+        var expiredDate = new Date(now.getTime() + TOKEN_EXPIRE_TIME);
         //      - signature
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now) //토큰생성시간
+                .setExpiration(expiredDate) //토큰 만료시간
+                .signWith(SignatureAlgorithm.HS512, this.secretKey) //사용할 암호화 알고리즘. 비밀키
+                .compact();
 
         // jwt 발급
-        throw new NotYetImplementedException();
+
     }
+
 
     public Authentication getAuthentication(String jwt) {
         UserDetails userDetails = this.memberService.loadUserByUsername(this.getUsername(jwt));
