@@ -23,28 +23,38 @@ public class MemberService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return this.memberRepository.findByUsername(username)
+        return memberRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("couldn't find user -> " + username));
     }
 
     public MemberEntity register(Auth.SignUp member) {
+        boolean exists = memberRepository.existsByUsername(member.getUsername());
         // 아이디가 존재하는 경우 exception 발생
-        boolean exists = false; // not implemented yet
+
         if (exists) {
-            throw new AlreadyExistUserException();
+            throw new RuntimeException("이미 사용중인 아이디이다");
         }
 
         // ID 생성 가능한 경우, 멤버 테이블에 저장
+        member.setPassword(passwordEncoder.encode(member.getPassword()));
+        var result =memberRepository.save(member.toEntity());
         // 비밀번호는 암호화 되어서 저장되어야함
-        throw new NotYetImplementedException();
+        return result;
     }
 
     public MemberEntity authenticate(Auth.SignIn member) {
         // id 로 멤버 조회
+       var user = memberRepository.findByUsername(member.getUsername())
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 ID입니다."));
 
         // 패스워드 일치 여부 확인
+        if(!passwordEncoder.matches(member.getPassword(), user.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+
+        }
         //      - 일치하지 않는 경우 400 status 코드와 적합한 에러 메시지 반환
+        return user;
         //      - 일치하는 경우, 해당 멤버 엔티티 반환
-        throw new NotYetImplementedException();
+//        throw new NotYetImplementedException();
     }
 }

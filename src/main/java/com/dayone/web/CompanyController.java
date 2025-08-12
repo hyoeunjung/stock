@@ -21,8 +21,11 @@ public class CompanyController {
 
     private final CompanyService companyService;
 
-    public CompanyController(CompanyService companyService) {
+    private final CacheManager redisCacheManager;
+
+    public CompanyController(CompanyService companyService, CacheManager redisCacheManager) {
         this.companyService = companyService;
+        this.redisCacheManager = redisCacheManager;
     }
 
     @GetMapping("/autocomplete")
@@ -32,12 +35,14 @@ public class CompanyController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('READ')")
     public ResponseEntity<?> searchCompany(final Pageable pageable) {
         Page<CompanyEntity> companies = companyService.getAllCompany(pageable);
         return ResponseEntity.ok(companies);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('WRITE')")
     public ResponseEntity<?> addCompany(@RequestBody Company request) {
         String ticker = request.getTicker().trim();
         if(ObjectUtils.isEmpty(ticker)){
@@ -49,8 +54,16 @@ public class CompanyController {
         return ResponseEntity.ok(company);
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteCompany() {
-        return null;
+    @DeleteMapping("/{ticker}")
+    @PreAuthorize("hasRole('WRITE')")
+    public ResponseEntity<?> deleteCompany(@PathVariable String ticker) {
+       String companyName = companyService.deleteCompany(ticker);
+       clearFinanceCache(companyName);
+        return ResponseEntity.ok(companyName);
+    }
+
+    public void clearFinanceCache(String companyName){
+        redisCacheManager.getCache(CacheKey.KEY_FINANCE).evict(companyName);
+
     }
 }
