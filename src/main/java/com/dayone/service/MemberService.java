@@ -32,7 +32,7 @@ public class MemberService implements UserDetailsService {
         // 아이디가 존재하는 경우 exception 발생
 
         if (exists) {
-            throw new RuntimeException("이미 사용중인 아이디이다");
+            throw new AlreadyExistUserException();
         }
 
         // ID 생성 가능한 경우, 멤버 테이블에 저장
